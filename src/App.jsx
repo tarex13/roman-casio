@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
-import { motion } from "motion/react";
+import { m, motion } from "motion/react";
 let currentCalculation = 0;
+let calculation = [];
 const romNums = [
   { text: "I", value: 1 },
   { text: "V", value: 5 },
@@ -52,6 +53,7 @@ const calcButton = (
 function App() {
   const [screen, setScreen] = useState("");
   const [clearScreen, setClearScreen] = useState(false);
+  const [calculated, setCalculated] = useState('')
   const [currentMix, setCurrentMix] = useState("");
   const [error, setError] = useState(false);
   const [placeValue, setPlaceValue] = useState(Infinity);
@@ -62,7 +64,15 @@ function App() {
     setCurrentMix("");
     setSubPairUsed(false);
     currentCalculation = 0;
+    calculation = [];
   };
+  const pushCalculation = (symbol) => {
+    setScreen(screen=>screen+symbol);
+    setCurrentMix(""); 
+    calculation.push(currentCalculation, symbol); 
+    //console.log(calculation.join(''))
+    currentCalculation = 0;
+  }
   const forbiddenRepetition = (letter, length, arr) => {
     let count = 0;
     let noRepeat = ["v", "l", "d"];
@@ -82,6 +92,28 @@ function App() {
       romNums.findIndex((el) => el["text"].toLowerCase() == text.toLowerCase())
     ]?.value;
   };
+  const evaluateAddition = (current, position) => {
+    if(evaluateSubtraction(current)) return;
+    let modulus = parseFloat(current / romNums[position].value);
+    let remainder = current - (modulus * romNums[position].value)
+    console.log("current:", current, "rremainder:", romNums[position].value)
+    for(let i = 0; i < modulus; i++){
+      setCalculated(calculated+romNums[position].text)
+      console.log(calculated)
+    }
+    if(remainder != 0){
+      evaluateAddition(remainder, position-1);
+    }
+  }
+
+  const evaluateSubtraction = (current) => {
+    let value = subtractionAllowed.findIndex(el => el.value === current);
+    if(value != -1){
+      setCalculated(calculated+subtractionAllowed[value].value)
+      return true;
+    }
+
+  }
   const isAllowed = (current) => {
     let lastChar = current.toLowerCase();
     let lastCharValue = getValRomNums(lastChar);
@@ -94,11 +126,14 @@ function App() {
         let index = subtractionAllowed.findIndex(
           (el) => el.text == (lastSecondChar + lastChar).toLowerCase()
         );
+        let indexPrevious = romNums.findIndex(
+          (el) => el.text.toLowerCase() == lastSecondChar.toLowerCase()
+        );
 
         if (index != -1) {
           setSubPairUsed(true);
           setPlaceValue((index + 1) % 2);
-          currentCalculation += subtractionAllowed[index].value;
+          currentCalculation += subtractionAllowed[index].value - romNums[indexPrevious].value;
           //console.log(currentCalculation);
           return true;
         }
@@ -117,6 +152,8 @@ function App() {
 
     if(length == 0 && romNums.some((val) => val["text"].toLowerCase() === lastChar)){
       currentCalculation += lastCharValue;
+      setCurrentMix(lastChar[0].toUpperCase())
+      setScreen(screen+lastChar[0].toUpperCase());
       return;
     }
 
@@ -161,10 +198,11 @@ function App() {
       setError(true);
       return;
     } else {
-      setCurrentMix(screen + lastChar[0].toUpperCase())
+      setCurrentMix(currentMix + lastChar[0].toUpperCase())
       setScreen(screen + lastChar[0].toUpperCase());
     }
   };
+  
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(false), 1000);
@@ -174,8 +212,8 @@ function App() {
   return (
     <>
       <div className="w-screen h-screen bg-[#130e0df7] flex flex-col justify-center items-center">
-        <div className="w-50 h-30 border-2 text-center border-yellow-400 rounded-lg p-3">
-          <span className="text-white font-semibold text-2xl">Roman Casio</span>
+        <div className="w-50 h-30 border-2 text-center flex flex-col border-yellow-400 rounded-lg p-3">
+          <span className="text-white font-semibold text-2xl pb-3">Roman Casio</span>
           <div>
             <motion.input
               type="text"
@@ -183,6 +221,7 @@ function App() {
               onChange={(e) => {
                 return isAllowed(e.target.value);
               }}
+              placeholder="MM + XXV = 2025"
               animate={{
                 x: error
                   ? [
@@ -207,7 +246,7 @@ function App() {
                 scale: 1.1,
                 transition: { type: "spring", stiffness: 300 },
               }}
-              onClick={()=>{setScreen(screen=>screen+"+");setCurrentMix("")}}
+              onClick={()=>{pushCalculation("+")}}
               className="w-10 h-10 bg-[#ac6b26] text-center flex justify-center items-center cursor-pointer"
             >
               <span className="text-center font-mono font-semibold text-zinc-300">
@@ -219,6 +258,7 @@ function App() {
                 scale: 1.1,
                 transition: { type: "spring", stiffness: 300 },
               }}
+              onClick={()=>{pushCalculation("-")}}
               className="w-10 h-10 bg-[#ac6b26] text-center flex justify-center items-center cursor-pointer"
             >
               <span className="text-center font-mono font-semibold text-zinc-300">
@@ -230,6 +270,7 @@ function App() {
                 scale: 1.1,
                 transition: { type: "spring", stiffness: 300 },
               }}
+              onClick={()=>{pushCalculation("*")}}
               className="w-10 h-10 bg-[#ac6b26] text-center flex justify-center items-center cursor-pointer"
             >
               <span className="text-center font-mono font-semibold text-zinc-300">
@@ -253,6 +294,7 @@ function App() {
                 scale: 1.1,
                 transition: { type: "spring", stiffness: 300 },
               }}
+              onClick={()=>{pushCalculation("/")}}
               className="w-10 h-10 bg-[#ac6b26] text-center flex justify-center items-center cursor-pointer"
             >
               <span className="text-center font-mono font-semibold text-zinc-300">
@@ -264,7 +306,7 @@ function App() {
                 scale: 1.1,
                 transition: { type: "spring", stiffness: 300 },
               }}
-              onClick={()=>{setScreen(currentCalculation); setCurrentMix(""); currentCalculation=0; setClearScreen(true);}}
+              onClick={()=>{calculation.push(currentCalculation);evaluateAddition(eval(calculation.join('')),romNums.length - 1); setCurrentMix(""); currentCalculation=0; setClearScreen(true); }}
               className="h-10 bg-[#ac6b26] text-center flex justify-center items-center cursor-pointer col-span-2"
             >
               <span className="text-center font-mono font-semibold text-zinc-300">
