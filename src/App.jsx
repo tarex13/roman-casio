@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
-import { m, motion } from "motion/react";
+import { motion } from "motion/react";
 let currentCalculation = 0;
 let calculation = [];
 const romNums = [
@@ -55,24 +55,44 @@ function App() {
   const [clearScreen, setClearScreen] = useState(false);
   const [calculated, setCalculated] = useState('')
   const [currentMix, setCurrentMix] = useState("");
+  const [isNumber, setIsNumber] = useState(false)
   const [error, setError] = useState(false);
   const [placeValue, setPlaceValue] = useState(Infinity);
-  //const maxLetterCount = 3;
   const [subPairUsed, setSubPairUsed] = useState(false);
+
+  //const maxLetterCount = 3;
+  useEffect(() => {
+    setScreen(isNumber ? calculated : calculated.toUpperCase());
+  }, [calculated]);
+
+  /** reset() clears the screen and resets all variables */
+  /** reset() takes no variable */
   const reset = () => {
     setScreen("");
     setCurrentMix("");
     setSubPairUsed(false);
+    setCalculated("")
+    setPlaceValue(Infinity)
     currentCalculation = 0;
     calculation = [];
   };
+
+  /** pushCalculation(symbol) is a helper function that pushes the currentCalculation and symbol to calculation(the array which eval evaluates) */
+  /** Arguments:(symbol). This is either a +, -, *, / symbol being pushed */
   const pushCalculation = (symbol) => {
+    if(screen == '' || symbol == screen.slice(screen.length - 1)){
+      return;
+    }
     setScreen(screen=>screen+symbol);
     setCurrentMix(""); 
+    setSubPairUsed(false);
     calculation.push(currentCalculation, symbol); 
     //console.log(calculation.join(''))
     currentCalculation = 0;
   }
+
+  /** forbiddenRepetition() ensures that letters not meant to be repeated aren't repeated */
+  /** Arguments: (letter, length, arr). Letter is the current letter being evaluated, length is the length of arr and arr is the current mix of characters being checked for any invalid repetitions */
   const forbiddenRepetition = (letter, length, arr) => {
     let count = 0;
     let noRepeat = ["v", "l", "d"];
@@ -86,41 +106,74 @@ function App() {
     }
     return count > 0;
   };
+
+  /** getValRomNums(text) is a helper function that converts a letter to it's equivalent value */
+  /** Arguments: (text). text is the letter being converted */
   const getValRomNums = (text) => {
     //console.log(romNums[romNums.findIndex(el=>el["text"].toLowerCase() == text.toLowerCase())]?.value)
     return romNums[
       romNums.findIndex((el) => el["text"].toLowerCase() == text.toLowerCase())
     ]?.value;
   };
+
+  /** evaluateSubtraction(current, position)  */
   const evaluateAddition = (current, position) => {
-    if(evaluateSubtraction(current)) return;
-    let modulus = parseFloat(current / romNums[position].value);
-    let remainder = current - (modulus * romNums[position].value)
-    console.log("current:", current, "rremainder:", romNums[position].value)
-    for(let i = 0; i < modulus; i++){
-      setCalculated(calculated+romNums[position].text)
-      console.log(calculated)
+    if(current > 3999){
+      setIsNumber(true)
+      setCalculated(current);
+      return;
+    }
+    if(evaluateSubtraction(current, position)) return;
+    let int = parseInt(current / romNums[position].value);
+    let remainder = current - (int * romNums[position].value)
+    for(let i = 0; i < int; i++){
+      //console.log(romNums[position])
+      setCalculated(prev => prev + romNums[position].text);
+      //console.log("calculated",romNums[position].text)
     }
     if(remainder != 0){
+      //console.log(remainder);
       evaluateAddition(remainder, position-1);
     }
   }
 
-  const evaluateSubtraction = (current) => {
-    let value = subtractionAllowed.findIndex(el => el.value === current);
+  /** evaluateSubtraction(current, position) finds a subtractive pair within an number and converts it to its roman numeral equivalent letter */
+  /** If there is no remainder it ends the program else it sends the remainder to evaluateAddition(current position) */
+  /** Arguments:(Current, position). Current is the integer to be evaluated. Position is the current position in romNums[]  */
+  const evaluateSubtraction = (current, position) => {
+    //console.log(current, "current")
+    let valueNoRemainderArr = Array.from(current.toString());
+    //console.log(valueNoRemainderArr, "valueNoRemainderArr")
+    let valueNoRemainder = parseInt(valueNoRemainderArr[0]) * (valueNoRemainderArr.length > 1 ? Math.pow(10, (valueNoRemainderArr.length - 1)) : 1);
+    //console.log("(10 * (valueNoRemainderArr.length - 1))", Math.pow(10, (valueNoRemainderArr.length - 1)))
+    //console.log(valueNoRemainder, "valueNoRemainder")
+    let remainder = current - valueNoRemainder;
+    let value = subtractionAllowed.findIndex(el => el.value === valueNoRemainder);
     if(value != -1){
-      setCalculated(calculated+subtractionAllowed[value].value)
+      setCalculated(prev => prev + subtractionAllowed[value].text)
+
+      if(remainder != 0){
+        evaluateAddition(remainder, position)
+      }
       return true;
     }
-
+    return false;
   }
+
+
+  /** isAllowed(current) checks whether a roman numeral is allowed or not */
+  /** Arg: (Current) is the character currently being added to mix or the whole screen(if called by input) */
   const isAllowed = (current) => {
-    let lastChar = current.toLowerCase();
+    let lastChar = current.slice(current.length - 1, current.length).toLowerCase();
     let lastCharValue = getValRomNums(lastChar);
     const length = currentMix.length;
     let characters = Array.from(currentMix);
     let lastSecondChar =
       length >= 1 ? characters[length - 1].toLowerCase() : "";
+
+    /** moveAllowed() checks to see if the rules of addition and subtraction in roman numerals are being followed */
+    /** moveAllowed() then adds up the calculation if the roman numeral is valid */
+    /** moveAllowed() takes no argument */
     const moveAllowed = () => {
       if (lastCharValue > getValRomNums(lastSecondChar)) {
         let index = subtractionAllowed.findIndex(
@@ -150,6 +203,8 @@ function App() {
       setClearScreen(false);
     }
 
+    
+
     if(length == 0 && romNums.some((val) => val["text"].toLowerCase() === lastChar)){
       currentCalculation += lastCharValue;
       setCurrentMix(lastChar[0].toUpperCase())
@@ -167,6 +222,7 @@ function App() {
         lastCharValue > getValRomNums(lastSecondChar) &&
         lastCharValue > getValRomNums(characters[length - 2]))
     ) {
+      console.log("Here1", romNums.some((val) => val["text"].toLowerCase() === lastChar, lastChar))
       setError(true);
       return;
     } else if (subPairUsed) {
@@ -174,6 +230,7 @@ function App() {
         lastChar.toLowerCase() == characters[length - 2].toLowerCase() ||
         lastChar.toLowerCase() == characters[length - 1].toLowerCase()
       ) {
+        console.log("Here2")
         setError(true);
         return;
       }
@@ -186,6 +243,7 @@ function App() {
         placeValue
       ) {
         //console.log((romNums.findIndex(el=>el.text == lastChar)))
+        console.log("Here3")
         setError(true);
         return;
       }
@@ -195,6 +253,7 @@ function App() {
       forbiddenRepetition(lastChar, length, characters) ||
       (length >= 1 && !moveAllowed())
     ) {
+        console.log("Here4")
       setError(true);
       return;
     } else {
@@ -217,8 +276,14 @@ function App() {
           <div>
             <motion.input
               type="text"
-              className="w-full caret-transparent h-10 text-lg outline-none p-3 text-white border"
+              className={`w-full caret-transparent h-10 text-lg p-3 text-white  ${!error ? 'focus:border-2 focus:border-sky-500' : 'outline-none'}`}
               onChange={(e) => {
+                const char = e.target.value;
+                let lastChar = char.slice(char.length - 1, char.length).toLowerCase();
+                if(['*', '+', '/', '-'].includes(lastChar)){
+                  pushCalculation(lastChar);
+                  return 
+                }
                 return isAllowed(e.target.value);
               }}
               placeholder="MM + XXV = 2025"
@@ -236,7 +301,7 @@ function App() {
             />
           </div>
         </div>
-        <div className="w-50 min-h-30 border-3 shadow-2xl border-t-transparent border-l-[#bb7f57] -mt-1 border-b-[#bb7f57] border-r-[#bb7f57] flex justify-center">
+        <div className="w-50 min-h-30 border-3 shadow-2xl border-t-transparent border-l-[#bb7f57] -mt-1 border-b-[#bb7f57] border-r-[#bb7f57] flex justify-center ">
           <div className="grid grid-cols-3 gap-4 pt-5 pb-5">
             {romNums.map((value, index) => {
               return calcButton(1, value, isAllowed);
@@ -306,7 +371,7 @@ function App() {
                 scale: 1.1,
                 transition: { type: "spring", stiffness: 300 },
               }}
-              onClick={()=>{calculation.push(currentCalculation);evaluateAddition(eval(calculation.join('')),romNums.length - 1); setCurrentMix(""); currentCalculation=0; setClearScreen(true); }}
+              onClick={()=>{calculation.push(currentCalculation);evaluateAddition(Math.round(eval(calculation.join(''))),romNums.length - 1); setCurrentMix(""); currentCalculation=0; setClearScreen(true); }}
               className="h-10 bg-[#ac6b26] text-center flex justify-center items-center cursor-pointer col-span-2"
             >
               <span className="text-center font-mono font-semibold text-zinc-300">
