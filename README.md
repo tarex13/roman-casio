@@ -1,7 +1,7 @@
 # 🏛️ Roman Casio
 
 *A Casio calculator… but for Roman numerals.*  
-Why? Because Roman Numerals, **“MM + XXV = 2025”** makes Math feel fun.  
+Why? Because Roman Numerals, **“MM + XXV = 2025”** make math feel more fun.  
 
 👉 [Live Demo](https://roman-casio.vercel.app)
 
