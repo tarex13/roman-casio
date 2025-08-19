@@ -8,7 +8,7 @@ Why? Because Roman Numerals, **“MM + XXV = 2025”** makes Math feel fun.
 ---
 
 ## Screenshots
-![Roman Casio Screenshot](./assets/screenshot.png)
+![Roman Casio Screenshot](./src/assets/screenshot.png)
 
 ---
 
@@ -39,7 +39,7 @@ Why? Because Roman Numerals, **“MM + XXV = 2025”** makes Math feel fun.
 Clone the repo and start the dev server:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/tarex13/roman-casio.git
 cd roman-casio
 npm install
 npm run dev
@@ -55,7 +55,7 @@ npm run preview
 ---
 
 ## 🎥 Demo GIF
-![Roman Casio Demo](./assets/demo.gif)
+![Roman Casio Demo](./src/assets/demo.gif)
 
 ---
 
