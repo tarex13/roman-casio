@@ -1,12 +1,67 @@
-# React + Vite
+# 🏛️ Roman Casio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+*A Casio calculator… but for Roman numerals.*  
+Why? Because Roman Numerals, **“MM + XXV = 2025”** makes Math feel fun.  
 
-Currently, two official plugins are available:
+👉 [Live Demo](https://roman-casio.vercel.app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## Screenshots
+![Roman Casio Screenshot](./assets/screenshot.png)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## Features
+-  **Addition, Subtraction, Multiplication, Division** [+,-,*,/...(maybe more)] with Roman numerals.  
+-  **Roman numeral validation** — prevents invalid sequences like `IIII` or `VV`.  
+-  **Conversion** — integers back to Roman numerals(if valid).  
+-  **Slick UI & animations** powered by TailwindCSS + Framer Motion for powerful animations and good style.  
+
+---
+
+## How It Works
+- Input Roman numerals using the on-screen buttons or keyboard.  
+- The app enforces the **rules of Roman numerals** (e.g., no more than 3 in a row, only valid subtractive pairs like `IV`, `IX`, `XL`, etc.).  
+- You can combine numerals with operators (`+`, `-`, `*`, `/`).  
+- Hitting `=` evaluates the expression and returns the result **as a Roman numeral** (or integer if > 3999).  
+
+---
+
+## 🛠️ Tech Stack
+- [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)  
+- [TailwindCSS](https://tailwindcss.com/)  
+- [Framer Motion](https://www.framer.com/motion/)  
+
+---
+
+## 🚀 Run Locally
+Clone the repo and start the dev server:
+
+```bash
+git clone <your-repo-url>
+cd roman-casio
+npm install
+npm run dev
+```
+
+For production build:
+
+```bash
+npm run build
+npm run preview
+```
+
+---
+
+## 🎥 Demo GIF
+![Roman Casio Demo](./assets/demo.gif)
+
+---
+
+## ℹ️ Notes
+This is a personal project — no contributions planned.  
+Built with cleverly placed rules, code, and some patience.  
+*(Also: no Gen AI was used in the making of the project itself — just for this README)*  
+
+---
